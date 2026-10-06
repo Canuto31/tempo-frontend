@@ -1,8 +1,10 @@
 import { useCallback, useEffect, useMemo, useState } from 'react'
 import { Icon } from './components/Icon'
+import { MatrixRain } from './components/MatrixRain'
 import { ApiConsole } from './features/api-console/ApiConsole'
 import { ResourceTable } from './features/api-dashboard/ResourceTable'
 import { resources, type ResourceKey } from './features/api-dashboard/resources'
+import { useTheme } from './hooks/useTheme'
 import './App.css'
 
 type ResourceData = Partial<Record<ResourceKey, unknown[]>>
@@ -18,6 +20,7 @@ const resourceIcons = {
 } as const
 
 function App() {
+  const { theme, toggleTheme } = useTheme()
   const [selectedKey, setSelectedKey] = useState<ResourceKey>('tasks')
   const [data, setData] = useState<ResourceData>({})
   const [errors, setErrors] = useState<ResourceErrors>({})
@@ -62,7 +65,9 @@ function App() {
   }
 
   return (
-    <div className="app-shell">
+    <>
+      <MatrixRain theme={theme} />
+      <div className="app-shell">
       <aside className="sidebar">
         <div className="brand">
           <div className="brand-mark"><span /></div>
@@ -105,10 +110,16 @@ function App() {
             <h1>Buenos días, equipo</h1>
             <p>Visualiza y prueba la comunicación entre el frontend y tu API local.</p>
           </div>
-          <button className="refresh-button" disabled={loading} onClick={refresh} type="button">
-            <Icon name="refresh" size={17} />
-            {loading ? 'Actualizando…' : 'Actualizar datos'}
-          </button>
+          <div className="topbar-actions">
+            <button aria-label={`Activar modo ${theme === 'light' ? 'noche' : 'día'}`} aria-pressed={theme === 'dark'} className="theme-toggle" onClick={toggleTheme} type="button">
+              <span className="theme-track"><span className="theme-thumb"><Icon name={theme === 'light' ? 'sun' : 'moon'} size={14} /></span></span>
+              <span>{theme === 'light' ? 'Modo día' : 'Modo noche'}</span>
+            </button>
+            <button className="refresh-button" disabled={loading} onClick={refresh} type="button">
+              <Icon name="refresh" size={17} />
+              {loading ? 'Actualizando…' : 'Actualizar datos'}
+            </button>
+          </div>
         </header>
 
         <section className="status-strip">
@@ -173,7 +184,8 @@ function App() {
           <span>Tempo Frontend · React + TypeScript</span>
         </footer>
       </main>
-    </div>
+      </div>
+    </>
   )
 }
 

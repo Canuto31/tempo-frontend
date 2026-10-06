@@ -2,22 +2,38 @@
 
 :root {
   font-family: 'DM Sans', system-ui, sans-serif;
-  color: #172033;
-  background: #f5f7fb;
+  color: #13261c;
+  background: #f3f8f5;
   font-synthesis: none;
   text-rendering: optimizeLegibility;
   -webkit-font-smoothing: antialiased;
-  --primary: #6757dc;
-  --primary-dark: #5545c8;
-  --ink: #172033;
-  --muted: #717a8d;
-  --line: #e5e8f0;
+  --primary: #078f4c;
+  --primary-dark: #05733d;
+  --ink: #13261c;
+  --muted: #6d7d73;
+  --line: #dce9e1;
   --panel: #ffffff;
   --success: #20a875;
+  --page: #f3f8f5;
+  --soft: #f5faf7;
+}
+
+:root[data-theme='dark'] {
+  color: #d6ffe7;
+  background: #030806;
+  --primary: #32e67f;
+  --primary-dark: #21bf67;
+  --ink: #e0ffec;
+  --muted: #7fa88f;
+  --line: #173524;
+  --panel: rgba(6, 19, 12, .92);
+  --success: #35f58a;
+  --page: #030806;
+  --soft: #09160f;
 }
 
 * { box-sizing: border-box; }
-body { margin: 0; min-width: 320px; min-height: 100vh; }
+body { margin: 0; min-width: 320px; min-height: 100vh; color: var(--ink); background: var(--page); transition: color .25s ease, background .25s ease; }
 button, input, textarea, select { font: inherit; }
 button { cursor: pointer; }
 code { font-family: 'SFMono-Regular', Consolas, monospace; }
