@@ -1,32 +1,132 @@
-# React + TypeScript + Vite
+# Tempo Frontend
 
-This template provides a minimal setup to get React working in Vite with HMR and some Oxlint rules.
+Cliente web de Tempo construido con React, TypeScript y Vite. El proyecto incluye una capa de servicios completamente tipada para consumir la API REST publicada por el backend.
 
-Currently, two official plugins are available:
+## Requisitos
 
-- [@vitejs/plugin-react](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react) uses [Oxc](https://oxc.rs)
-- [@vitejs/plugin-react-swc](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react-swc) uses [SWC](https://swc.rs/)
+- Node.js 20 o superior.
+- npm 10 o superior.
+- Tempo Backend disponible en `http://localhost:8080`.
 
-## React Compiler
+La documentación interactiva del backend local está en:
 
-The React Compiler is not enabled on this template because of its impact on dev & build performances. To add it, see [this documentation](https://react.dev/learn/react-compiler/installation).
+```text
+http://localhost:8080/tempo/api/swagger-ui/index.html
+```
 
-## Expanding the Oxlint configuration
+## Instalación y ejecución
 
-If you are developing a production application, we recommend enabling type-aware lint rules by installing `oxlint-tsgolint` and editing `.oxlintrc.json`:
+```bash
+npm install
+copy .env.example .env
+npm run dev
+```
 
-```json
-{
-  "$schema": "./node_modules/oxlint/configuration_schema.json",
-  "plugins": ["react", "typescript", "oxc"],
-  "options": {
-    "typeAware": true
-  },
-  "rules": {
-    "react/rules-of-hooks": "error",
-    "react/only-export-components": ["warn", { "allowConstantExport": true }]
+En PowerShell también se puede crear el archivo de entorno con:
+
+```powershell
+Copy-Item .env.example .env
+```
+
+Comandos disponibles:
+
+```bash
+npm run dev      # servidor local con recarga automática
+npm run build    # validación TypeScript y build de producción
+npm run lint     # análisis estático
+npm run preview  # vista previa del build
+```
+
+## Configuración
+
+| Variable | Valor local | Propósito |
+| --- | --- | --- |
+| `VITE_API_BASE_URL` | `/tempo/api` | Ruta base usada por el cliente HTTP. |
+| `VITE_DEV_PROXY_TARGET` | `http://localhost:8080` | Destino del proxy de Vite. |
+
+El proxy evita los bloqueos CORS durante el desarrollo. En producción, configure `VITE_API_BASE_URL` con una URL absoluta habilitada para CORS o publique frontend y backend detrás del mismo origen.
+
+## Arquitectura de servicios
+
+```text
+src/
+├── config/
+│   └── env.ts
+└── services/
+    ├── http/             # fetch, serialización y errores normalizados
+    ├── users/
+    ├── projects/
+    ├── tasks/
+    ├── task-statuses/
+    ├── categories/
+    ├── labels/
+    ├── system/
+    ├── api.types.ts      # tipos comunes (UUID y fechas ISO)
+    └── index.ts          # punto único de importación
+```
+
+Cada módulo separa los DTO de entrada/respuesta y el servicio que ejecuta las solicitudes. Todos los errores HTTP se convierten en `ApiError`, que expone `status` y `payload` para que la interfaz pueda decidir qué mostrar.
+
+## Endpoints implementados
+
+| Servicio | GET lista | GET detalle | POST | PUT | DELETE |
+| --- | --- | --- | --- | --- | --- |
+| Usuarios | ✓ | ✓ | ✓ | ✓ | ✓ |
+| Proyectos | ✓ | ✓ | ✓ | ✓ | ✓ |
+| Tareas | ✓ | ✓ | ✓ | ✓ | ✓ |
+| Estados de tarea | ✓ | ✓ | ✓ | ✓ | ✓ |
+| Categorías | ✓ | ✓ | ✓ | ✓ | ✓ |
+| Etiquetas | ✓ | ✓ | ✓ | ✓ | ✓ |
+
+También se expone `systemService.hello()` para el endpoint raíz publicado por Swagger.
+
+## Ejemplos de consumo
+
+Todos los servicios y tipos se importan desde un único archivo:
+
+```ts
+import {
+  ApiError,
+  projectsService,
+  tasksService,
+  type CreateTaskInput,
+} from './services'
+
+const projects = await projectsService.list({ ownerId: userId })
+
+const task: CreateTaskInput = {
+  title: 'Preparar entrega',
+  responsibleUserId: userId,
+  statusId,
+  estimatedTimeSeconds: 3600,
+  pokerPoints: 3,
+  projectId: projects[0]?.id,
+}
+
+try {
+  const createdTask = await tasksService.create(task)
+  await tasksService.update(createdTask.id!, { ...task, pokerPoints: 5 })
+  await tasksService.remove(createdTask.id!)
+} catch (error) {
+  if (error instanceof ApiError) {
+    console.error(error.status, error.payload)
   }
 }
 ```
 
-See the [Oxlint rules documentation](https://oxc.rs/docs/guide/usage/linter/rules) for the full list of rules and categories.
+Los filtros de tareas están modelados para aceptar como máximo una relación por solicitud, tal como lo exige el backend:
+
+```ts
+await tasksService.list({ projectId })
+await tasksService.list({ responsibleUserId: userId })
+```
+
+## Flujo Git
+
+El repositorio usa Git Flow:
+
+- `master`: base estable y futuras entregas de producción.
+- `develop`: integración del trabajo en curso.
+- `feature/*`, `release/*` y `hotfix/*`: ramas auxiliares administradas por Git Flow.
+
+Los módulos de API se mantienen en commits independientes para facilitar su revisión y validación.
