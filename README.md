@@ -146,6 +146,23 @@ await tasksService.list({ projectId })
 await tasksService.list({ responsibleUserId: userId })
 ```
 
+### Tareas, subtareas y finalización
+
+El módulo de tareas incluye `tasksService.updateCompletion(id, { completed })`,
+que consume `PATCH /api/v1/tasks/{id}/completion`. Según el contrato OpenAPI,
+esta operación recalcula automáticamente el estado de las tareas padre.
+
+En el dashboard:
+
+- **Nueva tarea** abre un formulario para crear una tarea padre junto con una o
+  varias subtareas.
+- Las subtareas se crean con `parentTaskId` y heredan responsable, estado,
+  proyecto y categoría de la tarea padre.
+- La tabla muestra la jerarquía, el progreso `completadas/total` y controles
+  para completar o reabrir cada tarea.
+- Después de cada cambio se consulta nuevamente el backend, de modo que la
+  finalización automática del padre se refleja inmediatamente en pantalla.
+
 ## Flujo Git
 
 El repositorio usa Git Flow:
