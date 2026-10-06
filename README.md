@@ -43,6 +43,16 @@ externas:
 Las eliminaciones solicitan confirmación antes de enviarse. Después de una
 operación de escritura, el dashboard actualiza automáticamente sus tablas.
 
+## Temas visuales
+
+El botón de tema ubicado en la cabecera alterna entre **modo día** y **modo
+noche**. La preferencia queda guardada en `localStorage` y, en la primera
+visita, se utiliza la configuración de color del sistema operativo.
+
+Ambos modos incluyen la identidad visual Matrix. El fondo animado respeta
+`prefers-reduced-motion`, por lo que permanece estático cuando el usuario ha
+solicitado reducir las animaciones del sistema.
+
 Comandos disponibles:
 
 ```bash
