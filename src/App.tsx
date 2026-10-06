@@ -4,6 +4,8 @@ import { MatrixRain } from './components/MatrixRain'
 import { ApiConsole } from './features/api-console/ApiConsole'
 import { ResourceTable } from './features/api-dashboard/ResourceTable'
 import { resources, type ResourceData, type ResourceKey } from './features/api-dashboard/resources'
+import { CreateTaskDialog } from './features/tasks/CreateTaskDialog'
+import { TaskHierarchy } from './features/tasks/TaskHierarchy'
 import { useTheme } from './hooks/useTheme'
 import './App.css'
 
@@ -25,6 +27,7 @@ function App() {
   const [errors, setErrors] = useState<ResourceErrors>({})
   const [loading, setLoading] = useState(true)
   const [lastUpdate, setLastUpdate] = useState<Date>()
+  const [showCreateTask, setShowCreateTask] = useState(false)
 
   const loadAll = useCallback(async () => {
     const results = await Promise.allSettled(resources.map((resource) => resource.load()))
@@ -167,14 +170,33 @@ function App() {
                 >{resource.label}</button>
               ))}
             </div>
+            {selected.key === 'tasks' && (
+              <button
+                className="create-task-button"
+                disabled={loading || !data.users?.length || !data.statuses?.length}
+                onClick={() => setShowCreateTask(true)}
+                type="button"
+              >
+                <span>+</span> Nueva tarea
+              </button>
+            )}
           </div>
-          <ResourceTable
-            allData={data}
-            error={errors[selected.key]}
-            loading={loading}
-            resource={selected}
-            rows={data[selected.key] ?? []}
-          />
+          {selected.key === 'tasks' ? (
+            <TaskHierarchy
+              allData={data}
+              error={errors.tasks}
+              loading={loading}
+              onRefresh={refresh}
+            />
+          ) : (
+            <ResourceTable
+              allData={data}
+              error={errors[selected.key]}
+              loading={loading}
+              resource={selected}
+              rows={data[selected.key] ?? []}
+            />
+          )}
         </section>
 
         <ApiConsole onMutation={refresh} />
@@ -185,6 +207,9 @@ function App() {
         </footer>
       </main>
       </div>
+      {showCreateTask && (
+        <CreateTaskDialog data={data} onClose={() => setShowCreateTask(false)} onCreated={refresh} />
+      )}
     </>
   )
 }
