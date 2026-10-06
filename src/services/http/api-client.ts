@@ -9,7 +9,11 @@ export interface RequestOptions extends Omit<RequestInit, 'body'> {
 }
 
 function buildUrl(path: string, query?: Record<string, QueryValue>): string {
-  const url = new URL(`${env.apiBaseUrl}${path.startsWith('/') ? path : `/${path}`}`)
+  // El segundo argumento permite usar tanto una URL absoluta como la ruta
+  // relativa que Vite redirige al backend durante el desarrollo local.
+  const url = new URL(env.apiBaseUrl, window.location.origin)
+  const requestPath = path.startsWith('/') ? path : `/${path}`
+  url.pathname = `${url.pathname.replace(/\/$/, '')}${requestPath}`
 
   Object.entries(query ?? {}).forEach(([key, value]) => {
     if (value !== undefined && value !== null) {

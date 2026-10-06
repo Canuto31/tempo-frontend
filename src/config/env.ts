@@ -1,4 +1,4 @@
-const DEFAULT_API_BASE_URL = 'http://localhost:8080/tempo/api'
+const DEFAULT_API_BASE_URL = '/tempo/api'
 
 /**
  * Centraliza la URL del backend para evitar que los módulos de dominio
