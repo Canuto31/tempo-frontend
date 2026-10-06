@@ -8,13 +8,24 @@ import {
 } from '../../services'
 
 export type ResourceKey = 'users' | 'projects' | 'tasks' | 'statuses' | 'categories' | 'labels'
+export type ResourceData = Partial<Record<ResourceKey, unknown[]>>
+
+export interface ResourceColumn {
+  key: string
+  label: string
+  relation?: {
+    resource: ResourceKey
+    displayKeys: string[]
+    emptyLabel?: string
+  }
+}
 
 export interface ResourceDefinition {
   key: ResourceKey
   label: string
   singular: string
   path: string
-  columns: Array<{ key: string; label: string }>
+  columns: ResourceColumn[]
   load: () => Promise<unknown[]>
 }
 
@@ -39,9 +50,9 @@ export const resources: ResourceDefinition[] = [
     path: '/api/v1/projects',
     columns: [
       { key: 'name', label: 'Proyecto' },
-      { key: 'description', label: 'Descripción' },
+      { key: 'ownerId', label: 'Propietario', relation: { resource: 'users', displayKeys: ['name', 'username', 'email'] } },
+      { key: 'parentProjectId', label: 'Proyecto padre', relation: { resource: 'projects', displayKeys: ['name'], emptyLabel: 'Proyecto raíz' } },
       { key: 'deadline', label: 'Fecha límite' },
-      { key: 'ownerId', label: 'Propietario' },
     ],
     load: projectsService.list,
   },
@@ -52,9 +63,11 @@ export const resources: ResourceDefinition[] = [
     path: '/api/v1/tasks',
     columns: [
       { key: 'title', label: 'Tarea' },
+      { key: 'projectId', label: 'Proyecto', relation: { resource: 'projects', displayKeys: ['name'], emptyLabel: 'Sin proyecto' } },
+      { key: 'responsibleUserId', label: 'Responsable', relation: { resource: 'users', displayKeys: ['name', 'username', 'email'] } },
+      { key: 'categoryId', label: 'Categoría', relation: { resource: 'categories', displayKeys: ['name'], emptyLabel: 'Sin categoría' } },
+      { key: 'statusId', label: 'Estado', relation: { resource: 'statuses', displayKeys: ['name'] } },
       { key: 'deadline', label: 'Fecha límite' },
-      { key: 'pokerPoints', label: 'Puntos' },
-      { key: 'statusId', label: 'Estado' },
     ],
     load: tasksService.list,
   },
@@ -67,7 +80,7 @@ export const resources: ResourceDefinition[] = [
       { key: 'name', label: 'Estado' },
       { key: 'position', label: 'Posición' },
       { key: 'defaultStatus', label: 'Predeterminado' },
-      { key: 'ownerId', label: 'Propietario' },
+      { key: 'ownerId', label: 'Propietario', relation: { resource: 'users', displayKeys: ['name', 'username', 'email'], emptyLabel: 'Global' } },
     ],
     load: taskStatusesService.list,
   },
@@ -78,7 +91,7 @@ export const resources: ResourceDefinition[] = [
     path: '/api/v1/categories',
     columns: [
       { key: 'name', label: 'Categoría' },
-      { key: 'ownerId', label: 'Propietario' },
+      { key: 'ownerId', label: 'Propietario', relation: { resource: 'users', displayKeys: ['name', 'username', 'email'], emptyLabel: 'Global' } },
       { key: 'createdAt', label: 'Creación' },
     ],
     load: categoriesService.list,
@@ -90,7 +103,7 @@ export const resources: ResourceDefinition[] = [
     path: '/api/v1/labels',
     columns: [
       { key: 'name', label: 'Etiqueta' },
-      { key: 'ownerId', label: 'Propietario' },
+      { key: 'ownerId', label: 'Propietario', relation: { resource: 'users', displayKeys: ['name', 'username', 'email'], emptyLabel: 'Global' } },
       { key: 'createdAt', label: 'Creación' },
     ],
     load: labelsService.list,

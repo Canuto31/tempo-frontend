@@ -3,11 +3,10 @@ import { Icon } from './components/Icon'
 import { MatrixRain } from './components/MatrixRain'
 import { ApiConsole } from './features/api-console/ApiConsole'
 import { ResourceTable } from './features/api-dashboard/ResourceTable'
-import { resources, type ResourceKey } from './features/api-dashboard/resources'
+import { resources, type ResourceData, type ResourceKey } from './features/api-dashboard/resources'
 import { useTheme } from './hooks/useTheme'
 import './App.css'
 
-type ResourceData = Partial<Record<ResourceKey, unknown[]>>
 type ResourceErrors = Partial<Record<ResourceKey, string>>
 
 const resourceIcons = {
@@ -170,6 +169,7 @@ function App() {
             </div>
           </div>
           <ResourceTable
+            allData={data}
             error={errors[selected.key]}
             loading={loading}
             resource={selected}

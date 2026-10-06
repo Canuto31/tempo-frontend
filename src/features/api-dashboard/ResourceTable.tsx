@@ -1,10 +1,38 @@
-import type { ResourceDefinition } from './resources'
+import type { ResourceColumn, ResourceData, ResourceDefinition } from './resources'
 
 interface ResourceTableProps {
   resource: ResourceDefinition
   rows: unknown[]
+  allData: ResourceData
   loading: boolean
   error?: string
+}
+
+function resolveValue(
+  row: Record<string, unknown>,
+  column: ResourceColumn,
+  allData: ResourceData,
+): string {
+  const value = row[column.key]
+  if (!column.relation) return displayValue(value)
+  if (value === null || value === undefined || value === '') {
+    return column.relation.emptyLabel ?? '—'
+  }
+
+  const relatedRows = allData[column.relation.resource] ?? []
+  const relatedItem = relatedRows.find((item) => {
+    const record = item as Record<string, unknown>
+    return record.id === value
+  }) as Record<string, unknown> | undefined
+
+  if (!relatedItem) return 'No disponible'
+
+  const displayKey = column.relation.displayKeys.find((key) => {
+    const candidate = relatedItem[key]
+    return candidate !== null && candidate !== undefined && candidate !== ''
+  })
+
+  return displayKey ? displayValue(relatedItem[displayKey]) : 'No disponible'
 }
 
 function displayValue(value: unknown): string {
@@ -19,7 +47,7 @@ function displayValue(value: unknown): string {
   return value
 }
 
-export function ResourceTable({ resource, rows, loading, error }: ResourceTableProps) {
+export function ResourceTable({ resource, rows, allData, loading, error }: ResourceTableProps) {
   if (loading) {
     return <div className="table-state"><span className="spinner" />Consultando el backend…</div>
   }
@@ -47,7 +75,7 @@ export function ResourceTable({ resource, rows, loading, error }: ResourceTableP
             return (
               <tr key={String(row.id ?? index)}>
                 {resource.columns.map((column) => (
-                  <td key={column.key}>{displayValue(row[column.key])}</td>
+                  <td key={column.key}>{resolveValue(row, column, allData)}</td>
                 ))}
                 <td><code className="id-code">{displayValue(row.id)}</code></td>
               </tr>
