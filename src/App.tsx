@@ -1,5 +1,6 @@
 import { useCallback, useEffect, useMemo, useState } from 'react'
 import { Icon } from './components/Icon'
+import { ApiConsole } from './features/api-console/ApiConsole'
 import { ResourceTable } from './features/api-dashboard/ResourceTable'
 import { resources, type ResourceKey } from './features/api-dashboard/resources'
 import './App.css'
@@ -41,7 +42,10 @@ function App() {
   }, [])
 
   useEffect(() => {
-    void loadAll()
+    // Aplaza la consulta al siguiente ciclo para evitar actualizar estado de
+    // forma síncrona dentro del efecto de montaje.
+    const timeoutId = window.setTimeout(() => void loadAll(), 0)
+    return () => window.clearTimeout(timeoutId)
   }, [loadAll])
 
   const selected = resources.find((resource) => resource.key === selectedKey) ?? resources[0]
@@ -69,6 +73,9 @@ function App() {
           <p className="nav-label">Workspace</p>
           <button className="nav-item active-overview" type="button">
             <Icon name="grid" /><span>Vista general</span>
+          </button>
+          <button className="nav-item" onClick={() => document.getElementById('api-console')?.scrollIntoView({ behavior: 'smooth' })} type="button">
+            <Icon name="terminal" /><span>Consola API</span>
           </button>
           <p className="nav-label resources-label">Recursos</p>
           {resources.map((resource) => (
@@ -158,6 +165,8 @@ function App() {
             rows={data[selected.key] ?? []}
           />
         </section>
+
+        <ApiConsole onMutation={refresh} />
 
         <footer className="dashboard-footer">
           <span><span className="pulse" /> API local activa</span>
