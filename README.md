@@ -28,6 +28,21 @@ En PowerShell también se puede crear el archivo de entorno con:
 Copy-Item .env.example .env
 ```
 
+Abra `http://localhost:5173` para usar el panel. La pantalla realiza una consulta
+inicial a los seis módulos, muestra los registros recibidos y permite volver a
+consultarlos con **Actualizar datos**.
+
+La sección **Consola API** permite probar cualquier operación sin herramientas
+externas:
+
+1. Seleccione `GET`, `POST`, `PUT` o `DELETE`.
+2. Escriba la ruta, por ejemplo `/api/v1/tasks`.
+3. Para `POST` y `PUT`, agregue el body JSON.
+4. Presione **Enviar solicitud** para ver el estado, tiempo y payload de respuesta.
+
+Las eliminaciones solicitan confirmación antes de enviarse. Después de una
+operación de escritura, el dashboard actualiza automáticamente sus tablas.
+
 Comandos disponibles:
 
 ```bash
