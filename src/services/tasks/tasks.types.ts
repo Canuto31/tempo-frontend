@@ -15,6 +15,7 @@ export interface Task {
   estimatedTimeSeconds?: number
   pokerPoints?: number
   createdAt?: IsoDateTime
+  completed?: boolean
   completedAt?: IsoDateTime | null
   updatedAt?: IsoDateTime
 }
@@ -36,6 +37,10 @@ interface TaskWriteFields {
 
 export type CreateTaskInput = TaskWriteFields
 export type UpdateTaskInput = TaskWriteFields
+
+export interface UpdateTaskCompletionInput {
+  completed: boolean
+}
 
 /** El backend acepta como máximo uno de estos filtros por solicitud. */
 export type ListTasksQuery =

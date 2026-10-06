@@ -1,2 +1,8 @@
 export { tasksService } from './tasks.service'
-export type { CreateTaskInput, ListTasksQuery, Task, UpdateTaskInput } from './tasks.types'
+export type {
+  CreateTaskInput,
+  ListTasksQuery,
+  Task,
+  UpdateTaskCompletionInput,
+  UpdateTaskInput,
+} from './tasks.types'
